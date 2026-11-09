@@ -1,0 +1,8 @@
+$kind: http-request
+url: http://127.0.0.1:8080/api/v1/auth/me
+method: DELETE
+auth:
+  type: bearer
+  credentials:
+    token: "{{json_web_token_0vsb}}"
+order: 3000
