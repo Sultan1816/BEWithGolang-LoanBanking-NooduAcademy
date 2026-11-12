@@ -55,6 +55,7 @@ Salin hasil 64 karakter tersebut ke `JWT_SECRET` pada `.env`. Isi konfigurasi be
 | Variabel | Nilai |
 | --- | --- |
 | `DATABASE_URL` | Connection string PostgreSQL dari provider/database Anda dengan konfigurasi TLS yang sesuai |
+| `IMGBB_API_KEY` | API key ImgBB untuk upload gambar profil; gunakan key baru dan simpan hanya di `.env` |
 | `JWT_SECRET` | Secret acak yang baru dibuat |
 | `HTTP_ADDRESS` | `127.0.0.1:8080` untuk pengembangan lokal |
 | `CORS_ORIGIN` | Origin frontend, misalnya `http://localhost:3000` |
@@ -69,8 +70,11 @@ DBCode menyimpan kredensial koneksinya secara terpisah; aplikasi membaca `DATABA
 1. Di VS Code Windows, install extension DBCode dan hubungkan ke database PostgreSQL yang dituju.
 2. Pastikan koneksi yang dipilih mengarah ke database `website_loan_banking` dan tabel `public.users` tersedia.
 3. Jalankan seluruh [migrations/001_users.sql](migrations/001_users.sql), lalu [migrations/002_move_auth_users_to_users.sql](migrations/002_move_auth_users_to_users.sql), termasuk `BEGIN` dan `COMMIT`.
+4. Jalankan [migrations/004_customer_image_ids.sql](migrations/004_customer_image_ids.sql) untuk menambahkan kolom ID gambar ImgBB pada `public.customers`.
 
 Migrasi pertama menambahkan index unik case-insensitive pada username dan email. Migrasi kedua memindahkan akun lama dari `auth_users` ke `users` dan menghapus `auth_users`. Jika menemukan bentrok ID, username, atau email, migrasi kedua berhenti tanpa menghapus tabel lama. Jika migrasi gagal, jalankan `ROLLBACK;` sebelum mengulang.
+
+Endpoint `POST /api/v1/customers/profile` menggunakan multipart form dengan file `ktp_image`, `selfie_image`, dan `payslip_image`. Endpoint `GET /api/v1/customers/profile` mengembalikan URL ImgBB untuk ditampilkan frontend. File dikirim ke ImgBB, jadi pahami bahwa pemilik tautan dapat melihat gambar tersebut.
 
 Tidak perlu memasang PostgreSQL lokal jika memakai database cloud. Migrasi tidak berjalan otomatis saat server dimulai.
 

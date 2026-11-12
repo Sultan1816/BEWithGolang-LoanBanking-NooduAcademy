@@ -1,0 +1,4 @@
+ALTER TABLE public.customers
+	ADD COLUMN IF NOT EXISTS ktp_image_id VARCHAR,
+	ADD COLUMN IF NOT EXISTS selfie_image_id VARCHAR,
+	ADD COLUMN IF NOT EXISTS payslip_image_id VARCHAR;

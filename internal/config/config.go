@@ -17,6 +17,7 @@ type Config struct {
 	JWTAudience string
 	JWTTTL      time.Duration
 	CORSOrigin  string
+	ImgBBAPIKey string
 }
 
 func Load() (Config, error) {
@@ -39,6 +40,10 @@ func Load() (Config, error) {
 	databaseURL := strings.TrimSpace(os.Getenv("DATABASE_URL"))
 	if databaseURL == "" {
 		return Config{}, errors.New("DATABASE_URL wajib diisi")
+	}
+	imgBBAPIKey := strings.TrimSpace(os.Getenv("IMGBB_API_KEY"))
+	if imgBBAPIKey == "" {
+		return Config{}, errors.New("IMGBB_API_KEY wajib diisi")
 	}
 
 	issuer := strings.TrimSpace(os.Getenv("JWT_ISSUER"))
@@ -63,5 +68,6 @@ func Load() (Config, error) {
 		JWTAudience: audience,
 		JWTTTL:      ttl,
 		CORSOrigin:  strings.TrimSpace(os.Getenv("CORS_ORIGIN")),
+		ImgBBAPIKey: imgBBAPIKey,
 	}, nil
 }

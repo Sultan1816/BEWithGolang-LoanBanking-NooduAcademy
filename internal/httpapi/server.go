@@ -13,6 +13,7 @@ import (
 	"time"
 
 	"noodu-login-service/internal/auth"
+	"noodu-login-service/internal/customerprofile"
 	"noodu-login-service/internal/users"
 
 	"golang.org/x/crypto/bcrypt"
@@ -31,15 +32,22 @@ type pinger interface {
 }
 
 type Server struct {
-	store   userStore
-	db      pinger
-	tokens  *auth.TokenManager
-	origin  string
-	limiter *loginLimiter
+	store            userStore
+	db               pinger
+	tokens           *auth.TokenManager
+	origin           string
+	limiter          *loginLimiter
+	customerProfiles *customerprofile.Service
 }
 
 func New(store userStore, db pinger, tokens *auth.TokenManager, origin string) *Server {
 	return &Server{store: store, db: db, tokens: tokens, origin: origin, limiter: newLoginLimiter(10, time.Minute)}
+}
+
+func NewWithCustomerProfiles(store userStore, db pinger, tokens *auth.TokenManager, origin string, customerProfiles *customerprofile.Service) *Server {
+	server := New(store, db, tokens, origin)
+	server.customerProfiles = customerProfiles
+	return server
 }
 
 func (server *Server) Handler() http.Handler {
@@ -52,6 +60,10 @@ func (server *Server) Handler() http.Handler {
 	mux.Handle("GET /api/v1/auth/me", server.requireAuth(http.HandlerFunc(server.me)))
 	mux.Handle("PATCH /api/v1/auth/me", server.requireAuth(http.HandlerFunc(server.updateMe)))
 	mux.Handle("DELETE /api/v1/auth/me", server.requireAuth(http.HandlerFunc(server.deleteMe)))
+	if server.customerProfiles != nil {
+		mux.Handle("POST /api/v1/customers/profile", server.requireAuth(http.HandlerFunc(server.createCustomerProfile)))
+		mux.Handle("GET /api/v1/customers/profile", server.requireAuth(http.HandlerFunc(server.getCustomerProfile)))
+	}
 	return server.securityHeaders(server.cors(mux))
 }
 

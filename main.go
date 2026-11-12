@@ -15,7 +15,10 @@ import (
 
 	"noodu-login-service/internal/auth"
 	"noodu-login-service/internal/config"
+	"noodu-login-service/internal/customerprofile"
+	"noodu-login-service/internal/customers"
 	"noodu-login-service/internal/httpapi"
+	"noodu-login-service/internal/imgbb"
 	"noodu-login-service/internal/users"
 )
 
@@ -42,7 +45,8 @@ func main() {
 	}
 
 	tokens := auth.NewTokenManager(cfg.JWTSecret, cfg.JWTIssuer, cfg.JWTAudience, cfg.JWTTTL)
-	api := httpapi.New(users.NewStore(db), db, tokens, cfg.CORSOrigin)
+	profiles := customerprofile.NewService(customers.NewStore(db), imgbb.NewClient(cfg.ImgBBAPIKey))
+	api := httpapi.NewWithCustomerProfiles(users.NewStore(db), db, tokens, cfg.CORSOrigin, profiles)
 	server := &http.Server{
 		Addr:              cfg.HTTPAddress,
 		Handler:           api.Handler(),
